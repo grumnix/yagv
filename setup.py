@@ -8,6 +8,7 @@ setuptools.setup(
     package_data = {'yagv': [ "data/icon.png", "data/hana_swimsuit_fv_solid_v1.gcode" ] },
     data_files = [
         ( "share/applications", [ "yagv.desktop" ] ),
+        ( "share/icons/hicolor/scalable/apps", [ "yagv.svg" ] ),
     ],
     classifiers = [
       "Environment :: Console",
