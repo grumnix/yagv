@@ -5,8 +5,7 @@ setuptools.setup(
     version = '0.5.8',        # -- check ./yagv & Makefile too
     description = 'Yet Another Gcode Viewer (3D Printing Format)',
     packages = setuptools.find_packages(),
-    package_data = {'yagv': [ "icon.png", "data/hana_swimsuit_fv_solid_v1.gcode" ] },
-    # include_package_data = True,
+    package_data = {'yagv': [ "data/icon.png", "data/hana_swimsuit_fv_solid_v1.gcode" ] },
     classifiers = [
       "Environment :: Console",
       "Topic :: Multimedia :: Graphics :: 3D Rendering",
