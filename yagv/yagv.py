@@ -5,15 +5,12 @@ YAGV_VERSION = "0.5.8"        # -- check Makefile and setup.py too
 import pyglet
 import math
 
-# Disable error checking for increased performance
-pyglet.options['debug_gl'] = False
-
 from pyglet import clock
 from pyglet.gl import *
 from pyglet.window import key
 from pyglet.window import mouse
 
-from gcodeParser import *
+from .gcodeParser import *
 import os.path
 import time
 
@@ -667,5 +664,3 @@ class MyWindow(pyglet.window.Window):
 		# reenable depth for next model display
 		glEnable(GL_DEPTH_TEST)
 		glDepthMask(1)
-
-App().main()
