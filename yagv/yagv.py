@@ -111,9 +111,8 @@ class App:
 		self.layerIdx = len(self.model.layers)//2
 		self.window.hud()
 
-		#img = pyglet.resource.image("icon.png")
-		#img = pyglet.image.load("/usr/local/share/yagv/icon.png")
-		#self.window.set_icon(img)
+		img = pyglet.image.load(resource_filename("yagv", "data/icon.png"))
+		self.window.set_icon(img)
 
 		pyglet.app.run()
 
