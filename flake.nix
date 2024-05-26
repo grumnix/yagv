@@ -1,6 +1,7 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
+    # FIXME: nixos-23.11 uses pyglet-2, which isn't compatible with 1.5
+    nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-24.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
