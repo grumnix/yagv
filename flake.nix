@@ -3,16 +3,13 @@
     # FIXME: nixos>=23.05 uses pyglet-2, which isn't compatible with 1.5
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
     flake-utils.url = "github:numtide/flake-utils";
-
-    nixgl.url = "github:nix-community/nixGL";
   };
 
-  outputs = { self, nixpkgs, flake-utils, nixgl }:
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ nixgl.overlay ];
         };
         pythonPackages = pkgs.python310Packages;
       in rec {
@@ -30,7 +27,7 @@
             postFixup = ''
               substituteInPlace $out/bin/yagv \
                 --replace 'exec -a "$0"' \
-                          'exec -a "$0" ${pkgs.nixgl.auto.nixGLDefault}/bin/nixGL'
+                          'exec -a "$0" nix run --impure github:guibou/nixGL#nixGLIntel -- '
             '';
 
             nativeBuildInputs = with pkgs; [ makeWrapper ];
