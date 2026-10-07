@@ -1,6 +1,6 @@
 # yagv - Yet Another Gcode Viewer, v0.5.8
 
-A fast 3D Gcode Viewer for Reprap-style 3D printers, in Python and OpenGL/pyglet
+A fast 3D Gcode Viewer for Reprap-style 3D printers, in Python and OpenGL/pyglet 2
 
 ![Screenshot](img/screenshot.png)
 
@@ -22,6 +22,9 @@ A fast 3D Gcode Viewer for Reprap-style 3D printers, in Python and OpenGL/pyglet
   * [Mandoline](https://github.com/Spiritdude/mandoline-py) 0.8.x: works
   * [Slicer4RTN](https://github.com/Spiritude/Slicer4RTN) 0.4.x: works (non-planar slices)
 * Day/Night mode (`--dark`)
+* Keys: Up/Down/PgUp/PgDn/Home/End select layer, Space resets the view, `B` centers on bed/model,
+  `T`/`R`/`G` toggle travel moves/retractions/grid, Ctrl-R reloads
+* Drag & drop a G-code file onto the window to open it
   
 ## Supported Platforms
 - Ubuntu Linux 20.04 LTS [confirmed]
