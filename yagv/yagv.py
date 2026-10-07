@@ -62,10 +62,10 @@ class App:
 		i = 1
 		while(i<len(sys.argv)):
 			m = [ ]
-			if preg_match('^--([\w\-]+)=(.*)$',sys.argv[i],m):
+			if preg_match(r'^--([\w\-]+)=(.*)$',sys.argv[i],m):
 				m[1] = m[1].replace('-','_')
 				self.conf[m[1]] = m[2]
-			elif preg_match('^--([\w\-]+)$',sys.argv[i],m):
+			elif preg_match(r'^--([\w\-]+)$',sys.argv[i],m):
 				m[1] = m[1].replace('-','_')
 				self.conf[m[1]] = 1
 			else:
@@ -87,7 +87,6 @@ class App:
 
 		if type(self.conf['bed_size'])==str:
 			self.conf['bed_size'] = list(map(lambda x: int(x),self.conf['bed_size'].split('x')))
-			print(self.conf['bed_size'])
 
 		if len(path)==0:
 			script_path = os.path.realpath(__file__)
@@ -176,7 +175,7 @@ class App:
 			#layer.end['Z'] = layer_vertices[:1]
 			
 		t2 = time.time()
-		print("end renderColors in %0.3f ms" % ((t2-t1)*1000.0, ))
+		print("end renderVertices in %0.3f ms" % ((t2-t1)*1000.0, ))
 	
 	def renderIndexedColors(self):
 		t1 = time.time()
@@ -503,7 +502,6 @@ class MyWindow(pyglet.window.Window):
 			self.app.panning_end(x, y, button, modifiers)
 
 	def on_key_release(self, symbol, modifiers):
-		print("pressed key: %s, mod: %s"%(symbol, modifiers))
 		#print("pressed key: %s, mod: %s"%(pyglet.window.key.R, pyglet.window.key.MOD_CTRL))
 
 		if symbol==pyglet.window.key.R and modifiers & pyglet.window.key.MOD_CTRL:
