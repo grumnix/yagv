@@ -177,7 +177,8 @@ class App:
 		# debug: log all events
 		# self.window.push_handlers(pyglet.window.event.WindowEventLogger())
 
-		self.load(path)
+		if not self.load(path):
+			sys.exit(1)
 
 		# default to the middle layer
 		self.layerIdx = len(self.model.layers)//2
@@ -189,19 +190,37 @@ class App:
 		pyglet.app.run()
 
 	def reload(self):
-		self.load(self.path)
-			
+		if self.load(self.path):
+			self.layerIdx = min(self.layerIdx, self.model.topLayer)
+			self.window.hud()
+
+	def open_file(self, path):
+		"""Load a new file (e.g. dropped onto the window), keeping the current one on failure"""
+		if self.load(path):
+			self.layerIdx = len(self.model.layers)//2
+			self.reset_view()
+			self.window.hud()
+			self.window.set_caption("Yet Another GCode Viewer v%s: %s" % (YAGV_VERSION, os.path.basename(path)))
+
 	def load(self, path):
-		
+		"""Parse and render a gcode file, returns False (and keeps the old model) on failure"""
+
 		print("loading file %s ..." % repr(path))
 		t1 = time.time()
 		
 		print("Parsing '%s'..." % path)
-		
-		self.path = path
 
-		parser = GcodeParser()
-		self.model = parser.parseFile(path)
+		try:
+			model = GcodeParser().parseFile(path)
+		except (OSError, UnicodeDecodeError) as e:
+			print("[ERROR] Can't read %s: %s" % (repr(path), e))
+			return False
+		if len(model.layers) == 0:
+			print("[ERROR] No printable layers found in %s" % repr(path))
+			return False
+
+		self.path = path
+		self.model = model
 
 		print("Done! %s" % self.model)
 		
@@ -219,6 +238,7 @@ class App:
 		
 		t2 = time.time()
 		print("loaded file in %0.3f ms" % ((t2-t1)*1000.0 ))
+		return True
 	
 	def renderVertices(self):
 		t1 = time.time()
@@ -342,6 +362,9 @@ class App:
 	def generateGraphics(self):
 		t1 = time.time()
 		
+		for graphics in (getattr(self, 'graphics_old', []), getattr(self, 'graphics_current', []), getattr(self, 'graphics_limbo', [])):
+			for vlist in graphics:
+				vlist.delete()
 		self.graphics_old = []
 		self.graphics_current = []
 		self.graphics_limbo = []
@@ -559,6 +582,10 @@ class MyWindow(pyglet.window.Window):
 		# the default handler sets viewport and the projection used by the labels
 		super().on_resize(width, height)
 		self.placeLabels(width, height)
+
+	def on_file_drop(self, x, y, paths):
+		if paths:
+			self.app.open_file(paths[0])
 
 	def on_mouse_press(self, x, y, button, modifiers):
 		#print("on_mouse_press(x=%d, y=%d, button=%s, modifiers=%s)"%(x, y, button, modifiers))

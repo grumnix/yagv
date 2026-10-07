@@ -1,6 +1,7 @@
 unreleased:
   - keys: PgUp/PgDn jump 10 layers, Space resets the view, B toggles centering on bed/model
   - keys: T/R/G toggle travel moves, retractions and grid+axes
+  - drag & drop a file onto the window to open it; unreadable files no longer crash the viewer
   - port to pyglet 2 (OpenGL core profile, shaders), flake now follows nixos-unstable
 
 0.5.8:
