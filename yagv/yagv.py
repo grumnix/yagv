@@ -3,6 +3,7 @@
 YAGV_VERSION = "0.5.8"        # -- check Makefile and setup.py too
 
 import pyglet
+import ctypes
 import math
 import numpy as np
 
@@ -582,6 +583,31 @@ class MyWindow(pyglet.window.Window):
 		# the default handler sets viewport and the projection used by the labels
 		super().on_resize(width, height)
 		self.placeLabels(width, height)
+
+	def _event_drag_enter(self, ev):
+		# Replaces pyglet 2.1's X11 handler, which crashes (TypeError on `data.l + 2`)
+		# when the drag source offers three or fewer data types.
+		from pyglet.libs.x11 import xlib
+		xclient = ev.xclient
+		self._xdnd_source = xclient.data.l[0]
+		self._xdnd_version = xclient.data.l[1] >> 24
+		self._xdnd_format = None
+
+		if self._xdnd_version > 5:
+			return
+
+		if xclient.data.l[1] & 1:
+			# more than three types: they are in the XdndTypeList property of the source
+			data, count, _ = self.get_single_property(self._xdnd_source, self._xdnd_atoms['XdndTypeList'], 4)  # XA_ATOM
+			atoms = ctypes.cast(data, ctypes.POINTER(xlib.Atom))
+			offered = [atoms[i] for i in range(count)]
+			if data:
+				xlib.XFree(data)
+		else:
+			offered = [xclient.data.l[2+i] for i in range(3)]
+
+		if self._xdnd_atoms['text/uri-list'] in offered:
+			self._xdnd_format = self._xdnd_atoms['text/uri-list']
 
 	def on_file_drop(self, x, y, paths):
 		# return right away so the drag source isn't kept waiting while we parse
