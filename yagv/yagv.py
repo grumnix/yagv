@@ -117,6 +117,7 @@ class App:
 		self.PX = 0.0
 		self.PY = 0.0
 		self.zoom = 1.0
+		self.centerOnBed = False
 		self.conf = { }
 		self.conf['bed_size'] = [ 200, 200 ]
 	
@@ -422,6 +423,21 @@ class App:
 		self.layerIdx = self.model.topLayer
 		self.layer_update()
 
+	def layer_step(self, n):
+		self.layerIdx = max(min(self.layerIdx+n, self.model.topLayer), 0)
+		self.layer_update()
+
+	def reset_view(self):
+		self.RX = 0.0
+		self.RZ = 0.0
+		self.PX = 0.0
+		self.PY = 0.0
+		self.zoom = 1.0
+
+	def toggle_center_on_bed(self):
+		self.centerOnBed = not self.centerOnBed
+		self.reset_view()
+
 	def layer_drag_end(self, x, y, button, modifiers):
 		self.layerDragStartLayer = None
 		self.layerDragStartX = None
@@ -477,7 +493,8 @@ class MyWindow(pyglet.window.Window):
       
 		# help
 		self.helpText = [
-						"Left-mouse: rotate | Middle: change layer, Scroll: zoom | Right: panning   Ctrl-R: reload"]
+						"Left-mouse: rotate | Middle: change layer, Scroll: zoom | Right: panning",
+						"Up/Down/PgUp/PgDn/Home/End: layer | Space: reset view | B: center on bed/model | Ctrl-R: reload"]
 		for txt in self.helpText:
 			self.blLabels.append(
 				pyglet.text.Label(	txt,
@@ -567,6 +584,14 @@ class MyWindow(pyglet.window.Window):
 			self.app.layer_bottom()
 		elif symbol==pyglet.window.key.END:
 			self.app.layer_top()
+		elif symbol==pyglet.window.key.PAGEUP:
+			self.app.layer_step(10)
+		elif symbol==pyglet.window.key.PAGEDOWN:
+			self.app.layer_step(-10)
+		elif symbol==pyglet.window.key.SPACE:
+			self.app.reset_view()
+		elif symbol==pyglet.window.key.B:
+			self.app.toggle_center_on_bed()
 		else:
 			print("pressed key: %s, mod: %s"%(symbol, modifiers))
 		
@@ -663,18 +688,24 @@ class MyWindow(pyglet.window.Window):
 		m = m @ mat_translate(0,0,-0.5)
 
 		# fit & user zoom model
-		max_width = max(
-			self.app.model.bbox.dx(),
-			self.app.model.bbox.dy(),
-			self.app.model.bbox.dz()
-		)
+		bed = self.app.conf['bed_size']
+		if self.app.centerOnBed:
+			max_width = max(bed[0], bed[1], self.app.model.bbox.zmax)
+			center = (bed[0]/2.0, bed[1]/2.0, self.app.model.bbox.cz())
+		else:
+			max_width = max(
+				self.app.model.bbox.dx(),
+				self.app.model.bbox.dy(),
+				self.app.model.bbox.dz()
+			)
+			center = (self.app.model.bbox.cx(), self.app.model.bbox.cy(), self.app.model.bbox.cz())
 		scale = self.app.zoom / max_width
 		m = m @ mat_scale(scale, scale, scale)
 
 		# user pan model
 		m = m @ mat_translate(self.app.PX, self.app.PY, 0)
 
-		m = m @ mat_translate(-self.app.model.bbox.cx(), -self.app.model.bbox.cy(), -self.app.model.bbox.cz())
+		m = m @ mat_translate(-center[0], -center[1], -center[2])
 
 		# GL expects column-major
 		self.program.use()
