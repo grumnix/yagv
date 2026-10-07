@@ -26,14 +26,6 @@
 
             doCheck = false;
 
-            postFixup = ''
-              substituteInPlace $out/bin/yagv \
-                --replace 'exec -a "$0"' \
-                          'exec -a "$0" nix run --impure github:guibou/nixGL#nixGLIntel -- '
-            '';
-
-            nativeBuildInputs = with pkgs; [ makeWrapper ];
-
             propagatedBuildInputs = with pythonPackages; [
               setuptools
               pyglet
