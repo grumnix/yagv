@@ -56,6 +56,8 @@ out vec4 final_color;
 
 void main()
 {
+	if (vertex_colors.a == 0.0)
+		discard;
 	final_color = vertex_colors;
 }
 """
@@ -118,6 +120,8 @@ class App:
 		self.PY = 0.0
 		self.zoom = 1.0
 		self.centerOnBed = False
+		self.showGrid = True
+		self.hiddenColors = set()
 		self.conf = { }
 		self.conf['bed_size'] = [ 200, 200 ]
 	
@@ -298,6 +302,10 @@ class App:
 			[ colorMap['extrude'].copy(),        colorMap['motion'].copy(), colorMap['retract'].copy(), colorMap['unretract'].copy(), colorMap['extrude_wall'].copy(), colorMap['extrude_support'].copy() ]
 		]
 		for i in range(6):         # -- add per type the alpha
+			if i in self.hiddenColors:
+				for t in range(3):
+					cm[t][i].append(0.)
+				continue
 			cm[0][i].append(.2 if i==1 or i==5 else .7)    # -- old
 			cm[1][i].append(.2 if i==1 else 1.)    # -- current
 			cm[2][i].append(.1)    # -- limbo
@@ -427,6 +435,22 @@ class App:
 		self.layerIdx = max(min(self.layerIdx+n, self.model.topLayer), 0)
 		self.layer_update()
 
+	def toggle_color(self, *indexes):
+		"""Show/hide segment kinds by color index (1: travel, 2+3: retract/restore)"""
+		if indexes[0] in self.hiddenColors:
+			self.hiddenColors.difference_update(indexes)
+		else:
+			self.hiddenColors.update(indexes)
+		self.renderColors()
+		for graphics, colors in ((self.graphics_old, self.vertex_colors[0]),
+		                         (self.graphics_current, self.vertex_colors[1]),
+		                         (self.graphics_limbo, self.vertex_colors[2])):
+			for vlist, c in zip(graphics, colors):
+				vlist.colors[:] = c
+
+	def toggle_grid(self):
+		self.showGrid = not self.showGrid
+
 	def reset_view(self):
 		self.RX = 0.0
 		self.RZ = 0.0
@@ -494,7 +518,7 @@ class MyWindow(pyglet.window.Window):
 		# help
 		self.helpText = [
 						"Left-mouse: rotate | Middle: change layer, Scroll: zoom | Right: panning",
-						"Up/Down/PgUp/PgDn/Home/End: layer | Space: reset view | B: center on bed/model | Ctrl-R: reload"]
+						"Up/Down/PgUp/PgDn/Home/End: layer | Space: reset view | B: center on bed/model | T/R/G: toggle travel/retracts/grid | Ctrl-R: reload"]
 		for txt in self.helpText:
 			self.blLabels.append(
 				pyglet.text.Label(	txt,
@@ -590,6 +614,12 @@ class MyWindow(pyglet.window.Window):
 			self.app.layer_step(-10)
 		elif symbol==pyglet.window.key.SPACE:
 			self.app.reset_view()
+		elif symbol==pyglet.window.key.T:
+			self.app.toggle_color(1)
+		elif symbol==pyglet.window.key.R:
+			self.app.toggle_color(2, 3)
+		elif symbol==pyglet.window.key.G:
+			self.app.toggle_grid()
 		elif symbol==pyglet.window.key.B:
 			self.app.toggle_center_on_bed()
 		else:
@@ -712,8 +742,9 @@ class MyWindow(pyglet.window.Window):
 		self.program['mvp'] = tuple(m.T.flatten())
 
 		# draw axes and bed grid
-		for vlist in self.decor:
-			vlist.draw(GL_LINES)
+		if self.app.showGrid:
+			for vlist in self.decor:
+				vlist.draw(GL_LINES)
 
 		# -- draw the model layers
 		#    lower layers
