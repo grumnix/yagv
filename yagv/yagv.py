@@ -171,7 +171,7 @@ class App:
 		self.path = "loading ..."
 
 		# -- create window soon, before loading ...
-		self.window = MyWindow(self, caption="Yet Another GCode Viewer v%s: %s" % (YAGV_VERSION,os.path.basename(path)), resizable=True, width=1024, height=768)
+		self.window = MyWindow(self, caption="Yet Another GCode Viewer v%s: %s" % (YAGV_VERSION,os.path.basename(path)), resizable=True, width=1024, height=768, file_drops=True)
 		pyglet.gl.glClearColor(colorMap['background'][0],colorMap['background'][1],colorMap['background'][2],1)
 
 		# debug: log all events
