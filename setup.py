@@ -24,6 +24,6 @@ setuptools.setup(
     python_requires='>3.6',
     install_requires=[
         'setuptools',
-        'pyglet>=1.4.10, <2'
+        'pyglet>=2'
     ]
 )

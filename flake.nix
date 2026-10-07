@@ -1,7 +1,6 @@
 {
   inputs = {
-    # FIXME: nixos>=23.05 uses pyglet-2, which isn't compatible with 1.5
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -11,7 +10,7 @@
         pkgs = import nixpkgs {
           inherit system;
         };
-        pythonPackages = pkgs.python310Packages;
+        pythonPackages = pkgs.python3Packages;
       in rec {
         packages = rec {
           default = yagv;
@@ -21,6 +20,9 @@
             version = "0.5.8";
 
             src = ./.;
+
+            pyproject = true;
+            build-system = [ pythonPackages.setuptools ];
 
             doCheck = false;
 

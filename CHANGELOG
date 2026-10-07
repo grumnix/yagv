@@ -1,3 +1,6 @@
+unreleased:
+  - port to pyglet 2 (OpenGL core profile, shaders), flake now follows nixos-unstable
+
 0.5.8:
   - support added for G2/G3 arc extrusions as used by ArcWelder
   - CHANGELOG added
