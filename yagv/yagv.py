@@ -584,8 +584,9 @@ class MyWindow(pyglet.window.Window):
 		self.placeLabels(width, height)
 
 	def on_file_drop(self, x, y, paths):
+		# return right away so the drag source isn't kept waiting while we parse
 		if paths:
-			self.app.open_file(paths[0])
+			pyglet.clock.schedule_once(lambda dt: self.app.open_file(paths[0]), 0)
 
 	def on_mouse_press(self, x, y, button, modifiers):
 		#print("on_mouse_press(x=%d, y=%d, button=%s, modifiers=%s)"%(x, y, button, modifiers))
